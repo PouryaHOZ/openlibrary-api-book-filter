@@ -38,7 +38,7 @@ def fetch_API(query:str):
 # Filtering all the books to after year 2000
 def filtering(books):
     try:
-        return filter(lambda x: x["first_publish_year"] > 2000, books)
+        return filter(lambda x: x.get("first_publish_year",0) > 2000, books)
     except:
         raise ValueError("There was an error while filtering the books (docs)")
 
@@ -46,7 +46,9 @@ def filtering(books):
 def save(books_filtered):
 
     # Choosing fields to save, and starting the counter
-    fields = ["title", "author_name", "first_publish_year", "publisher"]
+    fields = ["title", "author_name", "first_publish_year"
+              #, "publisher"
+              ]
     saved_books_num = 0
 
     # Starting the process, using CSV writer
@@ -58,9 +60,9 @@ def save(books_filtered):
             for book in books_filtered:
                     row = {
                         "title": book.get("title"),
-                        "author_name": book.get("author_name"),
-                        "first_publish_year": book.get("first_publish_year"),
-                        "publisher": book.get("publisher"),
+                        "author_name": ", ".join(book.get("author_name", "")),
+                        "first_publish_year": book.get("first_publish_year", ""),
+                        #"publisher": ", ".join(book.get("publisher"), ""),
                     }
                     writer.writerow(row)
 
