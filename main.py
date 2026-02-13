@@ -1,55 +1,70 @@
 import requests
 import csv
 
-# Getting user query
-
-query = ""
-
-print("What is your query?")
-
-while (len(query) < 3):
-    query = input()
-
-# Using API to get response
+# Defining constant variables
 
 API_URL = 'https://openlibrary.org/search.json'
 LIMIT = 50
 
-params = {
-    "limit": LIMIT,
-    "q":query
-}
+# Getting user query
+def get_query():
+    query = ""
 
-respose = requests.get(API_URL, params=params)
-data = respose.json()
-docs = data.get("docs", [])
+    print("What is your query?")
+
+    while (len(query) < 3):
+        query = input()
+    return query
+
+
+# Using API to get response
+def fetch_API(query:str):
+
+    params = {
+        "limit": LIMIT,
+        "q":query
+    }
+
+    respose = requests.get(API_URL, params=params)
+    data = respose.json()
+    docs = data.get("docs", [])
+    return docs
 
 # Choosing fields to save
+def filter_and_save(docs):
+    fields = ["title", "author_name", "first_publish_year", "publisher"]
 
-fields = ["title", "author_name", "first_publish_year", "publisher"]
+    # Filtering and saving books to the CSV file
 
-# Filtering and saving books to the CSV file
+    saved_books_num = 0
 
-saved_books_num = 0
+    with open("books.csv", "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fields)
+        writer.writeheader()
 
-with open("books.csv", "w", newline="", encoding="utf-8") as f:
-    writer = csv.DictWriter(f, fieldnames=fields)
-    writer.writeheader()
-
-    for doc in docs:
-        first_publish_year = doc.get("first_publish_year")
+        for doc in docs:
+            first_publish_year = doc.get("first_publish_year")
         
-        if (first_publish_year > 2000):
-            row = {
-                "title": doc.get("title"),
-                "author_name": doc.get("author_name"),
-                "first_publish_year": doc.get("first_publish_year"),
-                "publisher": doc.get("publisher"),
-            }
-            writer.writerow(row)
+            if (first_publish_year > 2000):
+                row = {
+                    "title": doc.get("title"),
+                    "author_name": doc.get("author_name"),
+                    "first_publish_year": doc.get("first_publish_year"),
+                    "publisher": doc.get("publisher"),
+                }
+                writer.writerow(row)
 
-            saved_books_num += 1
+                saved_books_num += 1
+    
+    return saved_books_num
 
 # Sending "Success Message"
 
-print("Saved", saved_books_num, "books to books.csv")
+
+
+if __name__ == "__main__":
+    q = get_query()
+    docs = fetch_API(q)
+    saved_num = filter_and_save(docs)
+
+    print("Saved", saved_num, "books in books.csv")
