@@ -9,10 +9,10 @@ LIMIT = 50
 # Getting user query
 def get_query():
     query = ""
-    
+
     while True:
         print("What is your query?")
-        query = input()
+        query = input().strip()
         if (len(query) >= 3):
             return query
         print("The query should be atleast 3 characters")
