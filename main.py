@@ -70,6 +70,7 @@ def save(books_filtered):
     except:
         raise ValueError("There was an error saving filtered books (docs) into books.csv")
 
+# The main part
 if __name__ == "__main__":
     q = get_query()
     books = fetch_API(q)
