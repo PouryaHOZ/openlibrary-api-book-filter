@@ -12,15 +12,15 @@ while (len(query) < 3):
 
 # Using API to get response
 
-url = 'https://openlibrary.org/search.json'
+API_URL = 'https://openlibrary.org/search.json'
+LIMIT = 50
 
 params = {
-    "first_publish_in": "[2000+TO+*]",
-    "limit": 50,
+    "limit": LIMIT,
     "q":query
 }
 
-respose = requests.get(url, params=params)
+respose = requests.get(API_URL, params=params)
 data = respose.json()
 docs = data.get("docs", [])
 
@@ -28,21 +28,28 @@ docs = data.get("docs", [])
 
 fields = ["title", "author_name", "first_publish_year", "publisher"]
 
-# Saving books to the CSV file
+# Filtering and saving books to the CSV file
+
+saved_books_num = 0
 
 with open("books.csv", "w", newline="", encoding="utf-8") as f:
     writer = csv.DictWriter(f, fieldnames=fields)
     writer.writeheader()
 
     for doc in docs:
-        row = {
-            "title": doc.get("title"),
-            "author_name": doc.get("author_name"),
-            "first_publish_year": doc.get("first_publish_year"),
-            "isbn": doc.get("isbn"),
-        }
-        writer.writerow(row)
+        first_publish_year = doc.get("first_publish_year")
+        
+        if (first_publish_year > 2000):
+            row = {
+                "title": doc.get("title"),
+                "author_name": doc.get("author_name"),
+                "first_publish_year": doc.get("first_publish_year"),
+                "publisher": doc.get("publisher"),
+            }
+            writer.writerow(row)
+
+            saved_books_num += 1
 
 # Sending "Success Message"
 
-print("Saved", len(docs), "books to books.csv")
+print("Saved", saved_books_num, "books to books.csv")
